@@ -129,7 +129,7 @@ const App: React.FC = () => {
               <Droplets className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-slate-800">HydrateMe</h1>
+              <h1 className="text-xl font-bold text-slate-800">Water Intake App</h1>
               <p className="text-xs text-slate-400 font-medium">Hello, {profile.name}!</p>
             </div>
           </div>

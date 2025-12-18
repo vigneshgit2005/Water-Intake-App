@@ -33,7 +33,7 @@ const SetupForm: React.FC<SetupFormProps> = ({ onComplete, initialProfile }) => 
   return (
     <div className="max-w-md mx-auto bg-white rounded-3xl shadow-xl overflow-hidden p-8">
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-slate-800">Welcome to HydrateMe</h2>
+        <h2 className="text-3xl font-bold text-slate-800">Welcome to Water Intake App</h2>
         <p className="text-slate-500 mt-2">Let's calculate your personalized daily goal.</p>
       </div>
 
