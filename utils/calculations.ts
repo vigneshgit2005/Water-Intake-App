@@ -1,23 +1,61 @@
 
-import { UserProfile, Gender, ActivityLevel, IntakeLog } from '../types';
+import { UserProfile, Gender, Climate, WeightUnit, IntakeLog } from '../types';
 
 export const calculateHydrationGoal = (
-  weight: number,
-  height: number,
-  gender: Gender,
-  activityLevel: ActivityLevel
+  profile: Partial<UserProfile>
 ): number => {
-  let goal = weight * 35;
-  if (height > 180) goal += 200;
-  if (gender === Gender.MALE) goal += 300;
+  const { 
+    weight = 70, 
+    weightUnit = WeightUnit.KG,
+    age = 25, 
+    gender = Gender.MALE, 
+    exerciseMinutesPerSession = 0, 
+    exerciseDaysPerWeek = 0,
+    climate = Climate.MODERATE,
+    caffeineCups = 0,
+    hasMedicalCondition = false
+  } = profile;
 
-  switch (activityLevel) {
-    case ActivityLevel.LIGHT: goal += 300; break;
-    case ActivityLevel.MODERATE: goal += 600; break;
-    case ActivityLevel.ACTIVE: goal += 1000; break;
-  }
+  // Convert weight to kg for internal calculation
+  const weightInKg = weightUnit === WeightUnit.LBS ? weight * 0.453592 : weight;
 
-  return Math.round(goal);
+  // 1. Base Multiplier by Age
+  // Under 30: 40 mL/kg
+  // 30–55: 35 mL/kg
+  // 55–65: 30 mL/kg
+  // Over 65: 25 mL/kg
+  let baseMultiplier = 35;
+  if (age < 30) baseMultiplier = 40;
+  else if (age <= 55) baseMultiplier = 35;
+  else if (age <= 65) baseMultiplier = 30;
+  else baseMultiplier = 25;
+
+  let goal = weightInKg * baseMultiplier;
+
+  // 2. Exercise Adjustment
+  // Adding ~500ml per hour of moderate exercise
+  const weeklyExerciseMinutes = exerciseMinutesPerSession * exerciseDaysPerWeek;
+  const dailyExerciseAdjustment = (weeklyExerciseMinutes / 7) * (500 / 60);
+  goal += dailyExerciseAdjustment;
+
+  // 3. Climate Adjustment
+  if (climate === Climate.HOT_HUMID) goal += 600; // Significant sweat loss
+  if (climate === Climate.HIGH_ALTITUDE) goal += 500; // Dry air and faster breathing
+  if (climate === Climate.COLD) goal += 200; // Increased fluid loss through respiratory moisture
+
+  // 4. Gender Adjustment
+  if (gender === Gender.MALE) goal += 250; // Typically higher muscle mass
+
+  // 5. Caffeine Consumption
+  // Offset diuretic effects by adding 50ml per cup of caffeine
+  goal += (caffeineCups * 50);
+
+  // 6. Medical Condition Adjustment
+  // Generic +300ml buffer if self-reported condition, but with a warning in UI
+  if (hasMedicalCondition) goal += 300;
+
+  // Minimum safety floor and maximum cap
+  return Math.min(6000, Math.max(1500, Math.round(goal)));
 };
 
 export const getTodayKey = (): string => {
@@ -36,10 +74,10 @@ export interface StreakStats {
   bestStreak: number;
 }
 
+// Added IntakeLog to imports above to fix line 77 error
 export const calculateStreaks = (logs: IntakeLog[], dailyGoal: number): StreakStats => {
   if (logs.length === 0) return { currentStreak: 0, bestStreak: 0 };
 
-  // Group logs by date
   const dailyTotals = new Map<string, number>();
   logs.forEach(log => {
     const date = new Date(log.timestamp).toISOString().split('T')[0];
@@ -56,10 +94,9 @@ export const calculateStreaks = (logs: IntakeLog[], dailyGoal: number): StreakSt
   let bestStreak = 0;
   let tempStreak = 0;
 
-  // Calculate best streak (all time)
-  // We need to iterate through all possible dates from the first log to today
   if (sortedDates.length > 0) {
-    const firstDate = new Date(sortedDates[sortedDates.length - 1]);
+    const firstDateStr = sortedDates[sortedDates.length - 1];
+    const firstDate = new Date(firstDateStr);
     const lastDate = new Date();
     const iterDate = new Date(firstDate);
     
@@ -71,8 +108,6 @@ export const calculateStreaks = (logs: IntakeLog[], dailyGoal: number): StreakSt
         tempStreak++;
         if (tempStreak > bestStreak) bestStreak = tempStreak;
       } else {
-        // If it's today and goal not met, don't break the streak yet for "current" calculation
-        // but for "best" calculation it breaks.
         if (key !== today) {
            tempStreak = 0;
         }
@@ -81,10 +116,6 @@ export const calculateStreaks = (logs: IntakeLog[], dailyGoal: number): StreakSt
     }
   }
 
-  // Calculate current streak specifically (looking backwards from today/yesterday)
-  let checkDate = new Date();
-  // If today's goal is met, start from today. 
-  // If not, but yesterday was met, the streak is still alive (it's the count up to yesterday).
   const todayTotal = dailyTotals.get(today) || 0;
   const yesterdayTotal = dailyTotals.get(yesterdayKey) || 0;
 

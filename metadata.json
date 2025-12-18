@@ -1,5 +1,7 @@
 {
   "name": "Water Intake App",
   "description": "A personalized hydration tracker that calculates optimal water intake based on your body metrics and provides AI-powered wellness advice.",
-  "requestFramePermissions": []
+  "requestFramePermissions": [
+    "camera"
+  ]
 }

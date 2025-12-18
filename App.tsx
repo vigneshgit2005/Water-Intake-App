@@ -10,7 +10,10 @@ import {
   TrendingUp,
   Droplets,
   Award,
-  Flame
+  Flame,
+  Waves,
+  Zap,
+  Sparkles
 } from 'lucide-react';
 import { UserProfile, IntakeLog, DailySummary } from './types';
 import { STORAGE_KEYS, INTAKE_PRESETS, OTHER_DRINKS } from './constants';
@@ -20,12 +23,13 @@ import WaterWave from './components/WaterWave';
 import AICoachCard from './components/AICoachCard';
 import HistoryChart from './components/HistoryChart';
 import StreakBadge from './components/StreakBadge';
+import ImageEditor from './components/ImageEditor';
 
 const App: React.FC = () => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [logs, setLogs] = useState<IntakeLog[]>([]);
   const [isSettingUp, setIsSettingUp] = useState(false);
-  const [activeTab, setActiveTab] = useState<'today' | 'trends'>('today');
+  const [activeTab, setActiveTab] = useState<'today' | 'trends' | 'aura'>('today');
 
   // Load data on mount
   useEffect(() => {
@@ -113,125 +117,113 @@ const App: React.FC = () => {
 
   if (isSettingUp || !profile) {
     return (
-      <div className="min-h-screen bg-slate-50 py-12 px-4 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-950 py-12 px-4 flex items-center justify-center">
         <SetupForm onComplete={handleProfileComplete} initialProfile={profile} />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-24">
+    <div className="min-h-screen bg-[#020617] pb-24 text-slate-200">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-30 px-6 py-4">
+      <header className="bg-[#020617]/80 backdrop-blur-md border-b border-slate-800 sticky top-0 z-30 px-6 py-4">
         <div className="max-w-xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="bg-blue-600 p-2 rounded-xl">
-              <Droplets className="w-6 h-6 text-white" />
+          <div className="flex items-center gap-3">
+            <div className="bg-blue-600 p-2.5 rounded-2xl shadow-lg shadow-blue-900/50">
+              <Zap className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-slate-800">Water Intake App</h1>
-              <p className="text-xs text-slate-400 font-medium">Hello, {profile.name}!</p>
+              <h1 className="text-xl font-black text-slate-100 tracking-tight">Hashira Hydration</h1>
+              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Welcome, {profile.name}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <StreakBadge count={streakStats.currentStreak} />
             <button 
               onClick={() => setIsSettingUp(true)}
-              className="p-2 hover:bg-slate-100 rounded-full transition-colors"
+              className="p-2 hover:bg-slate-800 rounded-full transition-colors text-slate-500 hover:text-cyan-400"
             >
-              <Settings className="w-6 h-6 text-slate-500" />
+              <Settings className="w-5 h-5" />
             </button>
           </div>
         </div>
       </header>
 
-      <main className="max-w-xl mx-auto px-6 py-8 space-y-8">
-        {activeTab === 'today' ? (
+      <main className="max-w-xl mx-auto px-6 py-8 space-y-10">
+        {activeTab === 'today' && (
           <>
-            {/* Main Circle Display */}
-            <div className="flex flex-col items-center justify-center space-y-6">
+            {/* Progress Visualization - Giyu 11th Form Theme */}
+            <div className="flex flex-col items-center justify-center space-y-12 py-8">
               <WaterWave percentage={progressPercentage} />
+              
               <div className="text-center">
-                <div className={`text-4xl font-black transition-colors ${isGoalMetToday ? 'text-blue-600' : 'text-slate-800'}`}>
+                <div className={`text-6xl font-black transition-all duration-500 ${isGoalMetToday ? 'text-cyan-400 scale-110 drop-shadow-[0_0_20px_rgba(34,211,238,0.4)]' : 'text-slate-100'}`}>
                   {formatVolume(todayTotal)}
                 </div>
-                <div className="text-slate-400 font-medium">
-                  of {formatVolume(profile.dailyGoal)} goal
+                <div className="text-slate-500 font-bold uppercase tracking-widest text-[11px] mt-2">
+                  Daily Goal: {formatVolume(profile.dailyGoal)}
                 </div>
                 {isGoalMetToday && (
-                  <div className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-600 rounded-full text-xs font-bold uppercase tracking-wider animate-bounce">
-                    <Award className="w-3.5 h-3.5" />
-                    Goal Reached!
+                  <div className="mt-6 inline-flex items-center gap-2 px-6 py-2 bg-cyan-600 text-white rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl shadow-cyan-900/40 animate-pulse">
+                    <Award className="w-4 h-4" />
+                    Technique Mastered
                   </div>
                 )}
               </div>
             </div>
 
-            {/* AI Coach Card */}
+            {/* AI Coaching Section */}
             <AICoachCard profile={profile} currentIntake={todayTotal} />
 
-            {/* Quick Logging */}
-            <section className="space-y-4">
-              <h3 className="text-lg font-bold text-slate-800 px-1">Log Water</h3>
-              <div className="grid grid-cols-2 gap-3">
+            {/* Manual Intake Section */}
+            <section className="space-y-5">
+              <div className="flex items-center gap-2 px-1">
+                <Droplets className="w-5 h-5 text-cyan-500" />
+                <h3 className="text-lg font-black text-slate-100 tracking-tight">Swift Replenishment</h3>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
                 {INTAKE_PRESETS.map((preset, idx) => (
                   <button
                     key={idx}
                     onClick={() => addLog(preset.amount)}
-                    className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-2xl hover:border-blue-300 hover:shadow-md transition-all active:scale-95 group"
+                    className="flex items-center justify-between p-6 bg-slate-900/50 border border-slate-800 rounded-3xl hover:border-cyan-500 hover:bg-slate-800/80 transition-all active:scale-95 group"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="bg-blue-50 text-blue-600 p-2 rounded-lg group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                    <div className="flex items-center gap-4">
+                      <div className="bg-slate-800 text-cyan-400 p-3 rounded-2xl group-hover:bg-cyan-500 group-hover:text-white transition-all">
                         {preset.icon}
                       </div>
-                      <span className="font-semibold text-slate-700">{preset.amount}ml</span>
+                      <span className="font-black text-slate-200">{preset.amount}ml</span>
                     </div>
-                    <Plus className="w-5 h-5 text-slate-300 group-hover:text-blue-500" />
+                    <Plus className="w-5 h-5 text-slate-600 group-hover:text-cyan-400 group-hover:scale-125 transition-all" />
                   </button>
                 ))}
               </div>
-              
-              <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm">
-                <h4 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Other Beverages</h4>
-                <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-                  {OTHER_DRINKS.map((drink, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => addLog(Math.round(drink.amount * drink.hydratingFactor), drink.label)}
-                      className="flex-shrink-0 flex flex-col items-center gap-2 group"
-                    >
-                      <div className="w-14 h-14 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-600 group-hover:bg-blue-50 group-hover:text-blue-600 transition-all border border-transparent group-hover:border-blue-100">
-                        {drink.icon}
-                      </div>
-                      <span className="text-xs font-bold text-slate-600">{drink.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
             </section>
 
-            {/* Recent Logs List */}
-            <section className="space-y-4 pb-8">
+            {/* List of Logs */}
+            <section className="space-y-4 pb-12">
               <div className="flex items-center justify-between px-1">
-                <h3 className="text-lg font-bold text-slate-800">Today's History</h3>
-                <span className="text-sm font-medium text-blue-600">{todayLogs.length} entries</span>
+                <h3 className="text-lg font-black text-slate-100 tracking-tight">Training Log</h3>
+                <span className="text-[10px] font-black uppercase tracking-widest text-cyan-400 bg-cyan-900/30 px-3 py-1 rounded-full border border-cyan-800/50">
+                  {todayLogs.length} Entries
+                </span>
               </div>
               <div className="space-y-3">
                 {todayLogs.length === 0 ? (
-                  <div className="text-center py-10 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
-                    <Droplets className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                    <p className="text-slate-400 text-sm font-medium">No water logged yet today.</p>
+                  <div className="text-center py-20 bg-slate-900/20 rounded-[2.5rem] border-2 border-dashed border-slate-800">
+                    <Waves className="w-10 h-10 text-slate-800 mx-auto mb-4 animate-pulse" />
+                    <p className="text-slate-600 text-xs font-bold uppercase tracking-widest">Awaiting First Drop</p>
                   </div>
                 ) : (
                   todayLogs.map(log => (
-                    <div key={log.id} className="bg-white p-4 rounded-2xl flex items-center justify-between shadow-sm border border-slate-50 hover:shadow-md transition-shadow">
+                    <div key={log.id} className="bg-slate-900/50 p-5 rounded-3xl flex items-center justify-between border border-slate-800 hover:bg-slate-800/50 transition-all group">
                       <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-500">
+                        <div className="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center text-cyan-500 group-hover:bg-cyan-500 group-hover:text-white transition-colors">
                           <DropletIconByType type={log.type} />
                         </div>
                         <div>
-                          <div className="font-bold text-slate-700">+{log.amount}ml</div>
-                          <div className="text-xs font-medium text-slate-400 flex items-center gap-1">
+                          <div className="font-black text-slate-100 text-lg">+{log.amount}ml</div>
+                          <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1.5 mt-0.5">
                             <Clock className="w-3 h-3" />
                             {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • {log.type}
                           </div>
@@ -239,7 +231,7 @@ const App: React.FC = () => {
                       </div>
                       <button 
                         onClick={() => deleteLog(log.id)}
-                        className="p-2 text-slate-300 hover:text-red-400 transition-colors"
+                        className="p-3 text-slate-700 hover:text-red-400 transition-all hover:bg-red-900/20 rounded-2xl"
                       >
                         <Trash2 className="w-5 h-5" />
                       </button>
@@ -249,90 +241,69 @@ const App: React.FC = () => {
               </div>
             </section>
           </>
-        ) : (
-          /* Trends Tab Content */
-          <div className="space-y-6 pb-8">
+        )}
+
+        {activeTab === 'trends' && (
+          <div className="space-y-8 pb-12">
             <HistoryChart data={historyData} />
-            
-            {/* Streak Summary */}
-            <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 flex flex-col items-center text-center">
+            <div className="bg-slate-900/50 rounded-[2.5rem] p-10 border border-slate-800 flex flex-col items-center text-center">
               <StreakBadge count={streakStats.currentStreak} size="lg" />
-              <div className="mt-6 grid grid-cols-2 w-full gap-4 border-t border-slate-50 pt-6">
+              <div className="mt-8 grid grid-cols-2 w-full gap-8 border-t border-slate-800 pt-8">
                 <div>
-                  <div className="text-sm font-bold text-slate-400 uppercase tracking-widest">Current</div>
-                  <div className="text-2xl font-black text-slate-800">{streakStats.currentStreak} Days</div>
+                  <div className="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1">Current</div>
+                  <div className="text-3xl font-black text-slate-100">{streakStats.currentStreak} <span className="text-sm font-bold text-slate-500">Days</span></div>
                 </div>
-                <div className="border-l border-slate-100">
-                  <div className="text-sm font-bold text-slate-400 uppercase tracking-widest">Best Ever</div>
-                  <div className="text-2xl font-black text-orange-500">{streakStats.bestStreak} Days</div>
+                <div className="border-l border-slate-800">
+                  <div className="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1">Best</div>
+                  <div className="text-3xl font-black text-orange-500">{streakStats.bestStreak} <span className="text-sm font-bold text-slate-500">Days</span></div>
                 </div>
               </div>
             </div>
+          </div>
+        )}
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-                <div className="text-blue-500 mb-2">
-                  <TrendingUp className="w-6 h-6" />
-                </div>
-                <div className="text-2xl font-black text-slate-800">
-                  {Math.round(historyData.reduce((acc, curr) => acc + curr.total, 0) / 7)}ml
-                </div>
-                <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Avg Daily</div>
-              </div>
-              <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-                <div className="text-green-500 mb-2">
-                  <Award className="w-6 h-6" />
-                </div>
-                <div className="text-2xl font-black text-slate-800">
-                  {historyData.filter(d => d.total >= d.goal).length} / 7
-                </div>
-                <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Goals Met</div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
-              <h3 className="font-bold text-slate-800 mb-4">Milestones</h3>
-              <div className="space-y-4">
-                <Milestone 
-                  icon={<Flame className="w-4 h-4" />} 
-                  label="Streak Starter" 
-                  desc="Hit your goal 3 days in a row" 
-                  done={streakStats.currentStreak >= 3} 
-                />
-                <Milestone 
-                  icon={<Droplets className="w-4 h-4" />} 
-                  label="Gallon Chugger" 
-                  desc="Drink over 3.8L in one day" 
-                  done={todayTotal > 3800} 
-                />
-                <Milestone 
-                  icon={<Award className="w-4 h-4" />} 
-                  label="Water Legend" 
-                  desc="Hit a 7-day streak" 
-                  done={streakStats.bestStreak >= 7} 
-                />
-              </div>
+        {activeTab === 'aura' && (
+          <div className="space-y-8 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <ImageEditor />
+            <div className="bg-slate-900/30 border border-slate-800 rounded-3xl p-6 text-center">
+              <Sparkles className="w-6 h-6 text-cyan-500 mx-auto mb-3" />
+              <p className="text-xs font-medium text-slate-400 leading-relaxed">
+                Use your Aura to represent your technique. Upload an image and ask for filters, styles, or specific Hashira effects.
+              </p>
             </div>
           </div>
         )}
       </main>
 
-      {/* Persistent Bottom Nav */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-6 py-4 z-40">
+      {/* Persistent Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-[#020617]/90 backdrop-blur-xl border-t border-slate-800 px-8 py-5 z-40">
         <div className="max-w-xl mx-auto flex items-center justify-around">
           <button 
             onClick={() => setActiveTab('today')}
-            className={`flex flex-col items-center gap-1 transition-colors ${activeTab === 'today' ? 'text-blue-600' : 'text-slate-400'}`}
+            className={`flex flex-col items-center gap-2 transition-all duration-300 ${activeTab === 'today' ? 'text-cyan-400 scale-110' : 'text-slate-600 hover:text-slate-400'}`}
           >
-            <Droplets className={`w-6 h-6 ${activeTab === 'today' ? 'fill-current' : ''}`} />
-            <span className="text-[10px] font-bold uppercase tracking-widest">Today</span>
+            <div className={`p-1.5 rounded-xl transition-colors ${activeTab === 'today' ? 'bg-cyan-900/20' : 'bg-transparent'}`}>
+              <Waves className={`w-6 h-6 ${activeTab === 'today' ? 'fill-current' : ''}`} />
+            </div>
+            <span className="text-[9px] font-black uppercase tracking-[0.2em]">Tracker</span>
+          </button>
+          <button 
+            onClick={() => setActiveTab('aura')}
+            className={`flex flex-col items-center gap-2 transition-all duration-300 ${activeTab === 'aura' ? 'text-cyan-400 scale-110' : 'text-slate-600 hover:text-slate-400'}`}
+          >
+            <div className={`p-1.5 rounded-xl transition-colors ${activeTab === 'aura' ? 'bg-cyan-900/20' : 'bg-transparent'}`}>
+              <Sparkles className={`w-6 h-6 ${activeTab === 'aura' ? 'fill-current' : ''}`} />
+            </div>
+            <span className="text-[9px] font-black uppercase tracking-[0.2em]">Artistry</span>
           </button>
           <button 
             onClick={() => setActiveTab('trends')}
-            className={`flex flex-col items-center gap-1 transition-colors ${activeTab === 'trends' ? 'text-blue-600' : 'text-slate-400'}`}
+            className={`flex flex-col items-center gap-2 transition-all duration-300 ${activeTab === 'trends' ? 'text-cyan-400 scale-110' : 'text-slate-600 hover:text-slate-400'}`}
           >
-            <History className={`w-6 h-6 ${activeTab === 'trends' ? 'fill-current' : ''}`} />
-            <span className="text-[10px] font-bold uppercase tracking-widest">History</span>
+            <div className={`p-1.5 rounded-xl transition-colors ${activeTab === 'trends' ? 'bg-cyan-900/20' : 'bg-transparent'}`}>
+              <History className={`w-6 h-6 ${activeTab === 'trends' ? 'fill-current' : ''}`} />
+            </div>
+            <span className="text-[9px] font-black uppercase tracking-[0.2em]">Analytics</span>
           </button>
         </div>
       </nav>
@@ -344,20 +315,20 @@ const DropletIconByType = ({ type }: { type: string }) => {
   switch (type) {
     case 'Coffee': return <Plus className="w-5 h-5 rotate-45" />;
     case 'Tea': return <Plus className="w-5 h-5 rotate-12" />;
-    default: return <Plus className="w-5 h-5" />;
+    default: return <Droplets className="w-5 h-5" />;
   }
 };
 
 const Milestone = ({ icon, label, desc, done }: { icon: React.ReactNode, label: string, desc: string, done: boolean }) => (
-  <div className={`flex items-center gap-4 p-4 rounded-2xl border transition-all ${done ? 'bg-blue-50 border-blue-100 shadow-sm' : 'bg-slate-50 border-slate-100 opacity-60'}`}>
-    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${done ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-400'}`}>
+  <div className={`flex items-center gap-5 p-6 rounded-[2rem] border transition-all duration-500 ${done ? 'bg-cyan-900/10 border-cyan-800/50 shadow-sm' : 'bg-slate-900/30 border-transparent opacity-40'}`}>
+    <div className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-500 ${done ? 'bg-cyan-600 text-white scale-110 rotate-3 shadow-[0_0_15px_rgba(34,211,238,0.3)]' : 'bg-slate-800 text-slate-600'}`}>
       {icon}
     </div>
     <div className="flex-1">
-      <div className={`text-sm font-bold ${done ? 'text-blue-900' : 'text-slate-600'}`}>{label}</div>
-      <div className="text-xs text-slate-400">{desc}</div>
+      <div className={`text-[11px] font-black uppercase tracking-wider ${done ? 'text-cyan-100' : 'text-slate-500'}`}>{label}</div>
+      <div className="text-[10px] font-bold text-slate-600 mt-1">{desc}</div>
     </div>
-    {done && <ChevronRight className="w-4 h-4 text-blue-400" />}
+    {done && <div className="w-6 h-6 bg-cyan-900/30 rounded-full flex items-center justify-center border border-cyan-800/50"><ChevronRight className="w-3 h-3 text-cyan-400" /></div>}
   </div>
 );
 
