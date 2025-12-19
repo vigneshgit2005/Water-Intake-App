@@ -4,12 +4,12 @@ import { UserProfile } from "../types";
 
 export const getHydrationAdvice = async (profile: UserProfile, currentIntake: number) => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  const prompt = `As a professional health coach, provide a brief (max 2 sentences), encouraging tip based on: Climate: ${profile.climate}, Exercise: ${profile.exerciseMinutesPerSession} min, Caffeine: ${profile.caffeineCups} cups, Progress: ${Math.round((currentIntake / profile.dailyGoal) * 100)}%. Keep it focused and friendly.`;
+  const prompt = `As a professional health coach, provide a brief (max 2 sentences), encouraging hydration tip based on: Climate: ${profile.climate}, Exercise: ${profile.exerciseMinutesPerSession} min, Caffeine: ${profile.caffeineCups} cups, Progress: ${Math.round((currentIntake / profile.dailyGoal) * 100)}%. Keep it focused and professional.`;
   try {
     const response = await ai.models.generateContent({ model: 'gemini-3-flash-preview', contents: prompt });
     return response.text;
   } catch (error) {
-    return "The path of the Hashira requires constant hydration. Keep drinking!";
+    return "Staying hydrated is essential for peak performance. Keep tracking your intake!";
   }
 };
 
