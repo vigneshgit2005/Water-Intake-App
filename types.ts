@@ -28,7 +28,7 @@ export interface UserProfile {
   name: string;
   weight: number; 
   weightUnit: WeightUnit;
-  height: number; // in cm
+  height: number;
   gender: Gender;
   age: number;
   activityLevel: ActivityLevel;
@@ -37,18 +37,18 @@ export interface UserProfile {
   climate: Climate;
   caffeineCups: number;
   hasMedicalCondition: boolean;
-  dailyGoal: number; // in ml
+  dailyGoal: number;
 }
 
 export interface IntakeLog {
   id: string;
-  amount: number; // in ml
+  amount: number;
   timestamp: number;
-  type: string; // e.g., "Water", "Tea", "Coffee"
+  type: string;
 }
 
 export interface DailySummary {
-  date: string; // YYYY-MM-DD
+  date: string;
   total: number;
   goal: number;
 }
